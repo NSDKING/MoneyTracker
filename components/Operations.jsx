@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Platform, Alert, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import Card from './Card';
 
-export default function Operations({ groupedTransactions, categories, db, getData, formatDate, setIsEdit, setEditItem }) {
-    const [editId, setEditId] = useState(null);
+export default function Operations({ groupedTransactions, categories, formatDate, setIsEdit, setEditItem, setEditId, isOper, setIsOper }) {
 
     const renderTransactionGroup = ({ item }) => {
         return (
@@ -41,9 +40,8 @@ export default function Operations({ groupedTransactions, categories, db, getDat
                 <Text style={{ fontSize: 16, fontWeight: "500" }}>Operations</Text>
                 <TouchableOpacity>
                     <Text style={{ fontSize: 16, fontWeight: "700", color: "#2D23F3" }}>All</Text>
-
                 </TouchableOpacity>
-             </View>
+            </View>
 
             <FlatList
                 data={groupedData}

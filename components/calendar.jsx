@@ -19,8 +19,7 @@ const CalendarModal = ({ isOpen, onClose, selectedDate, setSelectedDate }) => {
 
   const handleDatePress = (date) => {
     const adjustedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    console.log(adjustedDate);
-    setSelectedDate(adjustedDate);
+     setSelectedDate(adjustedDate);
   };
 
   const weeksDay = ["S", "M", "T", "W", "T", "F", "S"]; // Adjusted to start from Sunday

@@ -33,10 +33,6 @@ export default function EditTransaction({ visible, onClose, cate, editTransactio
 
     }, [editItem, setValue]);
 
-    useEffect(()=>{
-        console.log(editItem)
-
-    },[editItem])
 
     const onSubmit = async data => {
         try {

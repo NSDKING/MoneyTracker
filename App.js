@@ -15,8 +15,7 @@ const loadDatabase = async () => {
   const dbUri = Asset.fromModule(dbAsset).uri;
   const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
 
-  console.log(`Database URI: ${dbUri}`);
-  console.log(`Database file path: ${dbFilePath}`);
+   
 
   try {
     const fileInfo = await FileSystem.getInfoAsync(dbFilePath);

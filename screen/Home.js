@@ -18,6 +18,7 @@ export default function Home() {
     const [editId, setEditId] = useState(); 
     const [isEdit, setIsEdit] = useState(false); 
     const [editItem, setEditItem] = useState(); 
+    const [isOper, setIsOper] = useState(false);
 
     // Function to show the modal
     const showModal = (type) => {
@@ -145,6 +146,8 @@ export default function Home() {
             // Fetch new data and close edit mode
             await getData();
             setIsEdit(false);
+            console.log(result)
+
         } catch (error) {
             console.error("Error updating transaction:", error);
     
@@ -156,7 +159,6 @@ export default function Home() {
             );
         } finally {
    
-    
         }
     };
     
@@ -174,21 +176,25 @@ export default function Home() {
                     <Text style={styles.defaultText}>Available</Text>
                     <Text style={styles.title}>15000 FCFA</Text>
                 </View>
-                <View>
-                <HebdoStat />
-                    <View style={styles.buttonView}>
-                        <TouchableOpacity style={styles.button} onPress={() => { showModal("expense") }}>
-                            <Text style={styles.buttonText}>Expense</Text>
-                            <Image source={dol} style={styles.icon} />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => { showModal("income") }}>
-                            <Text style={styles.buttonText}>Deposit</Text>
-                            <View style={styles.plusIcon}>
-                                <Text style={styles.plusIconText}>+</Text>
+                {         
+                   !isOper&&( 
+                        <View>
+                            <HebdoStat />
+                            <View style={styles.buttonView}>
+                                <TouchableOpacity style={styles.button} onPress={() => { showModal("expense") }}>
+                                    <Text style={styles.buttonText}>Expense</Text>
+                                    <Image source={dol} style={styles.icon} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.button} onPress={() => { showModal("income") }}>
+                                    <Text style={styles.buttonText}>Deposit</Text>
+                                    <View style={styles.plusIcon}>
+                                        <Text style={styles.plusIconText}>+</Text>
+                                    </View>
+                                </TouchableOpacity>
                             </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                        </View>
+                    )
+                }
             </View>
 
             <AddTransaction visible={modalVisible} onClose={hideModal} cate={categories} type={Type} addTransaction={addTransaction} />
@@ -197,12 +203,14 @@ export default function Home() {
             <Operations
                 groupedTransactions={groupedTransactions}
                 categories={categories}
-                db={db}
-                getData={getData}
                 formatDate={formatDate}
                 setIsEdit={setIsEdit}
                 setEditItem={setEditItem}
+                setEditId={setEditId}  
+                isOper={isOper}
+                setIsOper={setIsOper}
             />
+
             
         </View>
     );
