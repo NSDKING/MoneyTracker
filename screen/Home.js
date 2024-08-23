@@ -1,6 +1,6 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, Platform } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image, Platform, Animated } from 'react-native';
 import dol from "../assets/img/dol.png";
 import Card from '../components/Card';
 import HebdoStat from '../components/HebdoStat';
@@ -20,6 +20,9 @@ export default function Home() {
     const [editItem, setEditItem] = useState(); 
     const [isOper, setIsOper] = useState(false);
 
+    // Animated value for the fade effect
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
     // Function to show the modal
     const showModal = (type) => {
         setModalVisible(true);
@@ -30,8 +33,6 @@ export default function Home() {
     const hideModal = () => {
         setModalVisible(false);
     };
-
-    
 
     // Formats the date to 'Jul 1, 2024'
     function formatDate(dateString) {
@@ -100,6 +101,15 @@ export default function Home() {
             await getData();
         });
     }, [db]);
+
+    useEffect(() => {
+        // Trigger animation based on isOper state
+        Animated.timing(fadeAnim, {
+            toValue: isOper ? 0 : 1, // Fade out when isOper is true, and fade in when false
+            duration: 300, // Duration of the animation
+            useNativeDriver: true, // Use native driver for performance
+        }).start();
+    }, [isOper]);
 
     const renderTransactionGroup = ({ item }) => {
         return (
@@ -177,8 +187,8 @@ export default function Home() {
                     <Text style={styles.title}>15000 FCFA</Text>
                 </View>
                 {         
-                   !isOper&&( 
-                        <View>
+                   !isOper && ( 
+                        <Animated.View style={[{ opacity: fadeAnim }]}>
                             <HebdoStat />
                             <View style={styles.buttonView}>
                                 <TouchableOpacity style={styles.button} onPress={() => { showModal("expense") }}>
@@ -192,7 +202,7 @@ export default function Home() {
                                     </View>
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </Animated.View>
                     )
                 }
             </View>
@@ -280,7 +290,7 @@ const styles = StyleSheet.create({
         borderBottomColor: 'black',
         borderBottomWidth: 1.5,
     },
-    Operation: {
+    animatedContainer: {
         marginTop: 10,
         backgroundColor: 'white',
         padding: 20,
@@ -298,10 +308,6 @@ const styles = StyleSheet.create({
                 elevation: 5,
             },
         }),
-    },
-    headerOperation: {
-        flexDirection: "row",
-        justifyContent: "space-between"
     },
     dateHeader: {
         fontSize: 18,

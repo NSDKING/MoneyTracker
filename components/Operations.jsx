@@ -1,8 +1,17 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Platform, TouchableOpacity, Animated } from 'react-native';
 import Card from './Card';
 
 export default function Operations({ groupedTransactions, categories, formatDate, setIsEdit, setEditItem, setEditId, isOper, setIsOper }) {
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+        }).start();
+    }, [groupedTransactions]);
 
     const renderTransactionGroup = ({ item }) => {
         return (
@@ -11,7 +20,7 @@ export default function Operations({ groupedTransactions, categories, formatDate
                 {item.data.map((transaction) => (
                     <Card
                         key={transaction.id}
-                        img={require("../assets/img/dol.png")} // Replace with dynamic image source if available
+                        img={require("../assets/img/dol.png")}
                         item={transaction}
                         link={getLinkById(transaction.category_ID)}
                         setEditId={setEditId}
@@ -28,18 +37,19 @@ export default function Operations({ groupedTransactions, categories, formatDate
         return category ? category.link : null;
     };
 
-    // Convert grouped transactions object into a list for FlatList and sort by date in descending order
     const groupedData = Object.keys(groupedTransactions).map(date => ({
         date,
         data: groupedTransactions[date],
-    })).sort((a, b) => b.date.localeCompare(a.date)); // Sort dates in descending order
+    })).sort((a, b) => b.date.localeCompare(a.date));
 
     return (
-        <View style={styles.Operation}>
+        <Animated.View style={[styles.Operation, { opacity: fadeAnim }]}>
             <View style={styles.headerOperation}>
                 <Text style={{ fontSize: 16, fontWeight: "500" }}>Operations</Text>
-                <TouchableOpacity>
-                    <Text style={{ fontSize: 16, fontWeight: "700", color: "#2D23F3" }}>All</Text>
+                <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => { setIsOper(!isOper) }}>
+                    <Text style={{ fontSize: 16, fontWeight: "700", color: "#2D23F3" }}>{(!isOper ? "All" : "Close")}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -49,7 +59,7 @@ export default function Operations({ groupedTransactions, categories, formatDate
                 keyExtractor={(item) => item.date}
                 contentContainerStyle={{ paddingVertical: 20 }}
             />
-        </View>
+        </Animated.View>
     );
 }
 
@@ -75,7 +85,8 @@ const styles = StyleSheet.create({
     },
     headerOperation: {
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        margin:0,
     },
     dateHeader: {
         fontSize: 18,
@@ -84,4 +95,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         color: '#333',
     },
+    button:{
+  
+    }
 });
