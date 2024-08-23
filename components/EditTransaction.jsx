@@ -1,25 +1,53 @@
-import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import CalendarModal from './calendar'; // Ensure this path is correct
 import { format } from 'date-fns';
 import Modal from 'react-native-modal'; 
 import calendarIcon from '../assets/img/calendar.png'; // Make sure the icon path is correct
+import deleteIcon from '../assets/img/delete.png'; // Make sure the icon path is correct
 import CategoryModal from './CategoryModal';
- 
-export default function AddTransaction({ visible, onClose, type, cate, addTransaction }) {
+
+export default function EditTransaction({ visible, onClose, cate, editTransaction, onDelete, editItem }) {
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const [isCalendarVisible, setCalendarVisible] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(null);
     const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(null); // Use null initially
-    const [cateValue, setCateValue] = useState(null);
 
-    const onSubmit = data => {
-        // Log form data and additional state
-        addTransaction(selectedDate, data.amount, data.note, cateValue, type);
-        reset();  
-        onClose();  
+    // Provide default values if editItem is undefined
+    const initialDate = editItem?.date ? new Date(editItem.date) : new Date();
+;    const initialType = editItem?.type || 'expense';
+
+    const [selectedDate, setSelectedDate] = useState(initialDate);
+    const [cateValue, setCateValue] = useState(editItem?.category_ID);
+    const [selectedCategory, setSelectedCategory] = useState(editItem?.category_ID);
+    const [type, setType] = useState(initialType);
+
+    useEffect(() => {
+        if (editItem) {
+            setValue('date', format(new Date(editItem.date), 'yyyy-MM-dd'));
+            setValue('amount', editItem.amount.toString());
+            setSelectedCategory(findCateById(editItem.category_ID)?.link);
+            setCateValue(editItem.category_ID);
+            setValue('note', editItem.note || '');
+        }
+
+    }, [editItem, setValue]);
+
+    useEffect(()=>{
+        console.log(editItem)
+
+    },[editItem])
+
+    const onSubmit = async data => {
+        try {
+            await editTransaction(selectedDate, data.amount, cateValue, data.note, type);
+
+            reset();  
+            onClose();  
+         } catch (error) {
+            console.error("Error updating transaction:", error);
+            Alert.alert("Error", "There was an issue updating the transaction. Please try again.");
+        }
     };
 
     const handleDateSelection = (date) => {
@@ -29,12 +57,10 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
     };
 
     const handleCategorySelection = (categoryID) => {
+        setCateValue(categoryID); 
         setSelectedCategory(findCateById(categoryID).link); 
-        setCateValue(categoryID); // Set the category ID
-
-        setCategoryModalVisible(false); // Hide category modal after selection
-        setValue('category', findCateById(categoryID)); // Update form value if needed
-    };
+        setCategoryModalVisible(false); 
+     };
 
     const findCateById = (id) => {
         return cate.find(category => category.id === id) || null;
@@ -49,7 +75,12 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
             style={styles.modalContainer} // Add custom styles
         >
             <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Add Transaction</Text>
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={onDelete} // Call delete function when pressed
+                >
+                    <Image source={deleteIcon} style={styles.deleteIcon} />
+                </TouchableOpacity>
                 
                 <Controller
                     control={control}
@@ -112,7 +143,7 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
                             onPress={() => setCategoryModalVisible(true)}
                         >
                             <Text style={styles.buttonText}>
-                                {selectedCategory ? selectedCategory   : 'Selecte Category'}
+                                {selectedCategory}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -125,7 +156,7 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
                         <TextInput
                             style={styles.input}
                             placeholder="Note"
-                            placeholderTextColor="#666"  // Set a darker color for better readability
+                            placeholderTextColor="#666"  
                             onBlur={onBlur}
                             onChangeText={onChange}
                             value={value}
@@ -151,7 +182,8 @@ const styles = StyleSheet.create({
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: 660, // Set a fixed height for the modal
+        height: 660, 
+        paddingTop:50
     },
     modalTitle: {
         fontSize: 18,
@@ -161,7 +193,7 @@ const styles = StyleSheet.create({
     },
     input: {
         width: '100%',
-        height:45,
+        height: 45,
         padding: 10,
         marginVertical: 5,
         borderWidth: 1,
@@ -186,6 +218,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginVertical: 5,
+        height: 45,
     },
     icon: {
         width: 20,
@@ -205,5 +238,21 @@ const styles = StyleSheet.create({
         borderRadius: 13,
         marginTop: 20,
         marginLeft: 10,
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        width: 40,
+        height: 40,
+        backgroundColor: '#f8d7da', // Light red background for delete button
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1, 
+     },
+    deleteIcon: {
+        width: 24,
+        height: 24,
     },
 });

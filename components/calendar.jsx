@@ -8,7 +8,7 @@ const ITEM_WIDTH = width / NUM_COLUMNS; // Calculate item width
 
 const CalendarModal = ({ isOpen, onClose, selectedDate, setSelectedDate }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-
+  
   const handlePreviousMonth = () => {
     setCurrentMonth(prevMonth => subMonths(prevMonth, 1));
   };
@@ -18,9 +18,9 @@ const CalendarModal = ({ isOpen, onClose, selectedDate, setSelectedDate }) => {
   };
 
   const handleDatePress = (date) => {
-    setSelectedDate(date); 
-    // Format the date using the local time zone
-    console.log('Formatted Date (local time):', format(date, 'yyyy-MM-dd HH:mm:ss'));
+    const adjustedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    console.log(adjustedDate);
+    setSelectedDate(adjustedDate);
   };
 
   const weeksDay = ["S", "M", "T", "W", "T", "F", "S"]; // Adjusted to start from Sunday

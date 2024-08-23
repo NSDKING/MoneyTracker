@@ -1,42 +1,49 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
-import dol from "../assets/img/dol.png"
 
-export default function Card({ item, link }) {
+export default function Card({ item, link, setEditId, setIsEdit, setEditItem }) {
 
- 
+  const handlePress = () => {
+    setEditId(item.id);
+    setIsEdit(true);
+    setEditItem(item);
+  };
 
-    
+  // Determine the color based on the type of transaction
+  const amountColor = item.type ==="income" ? 'green' : 'red'; // Assuming positive amounts are income and negative are expenses
+
   return (
-    <View style={styles.card}>
-        <View style={{flexDirection:"row", alignItems:"center"}}>
-            <Image
-                source={require('../assets/img/net.png')} 
-                style={styles.image}  
-            />  
-            <View>
-                <Text style={styles.title}>{link}</Text>
-                <Text style={styles.lightText}>{item.note}</Text>
-            </View>
+    <TouchableOpacity style={styles.card} onPress={handlePress}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Image
+          source={require('../assets/img/net.png')}
+          style={styles.image}
+        />
+        <View>
+          <Text style={styles.title}>{link}</Text>
+          <Text style={styles.lightText}>{item.note}</Text>
         </View>
-        <Text style={styles.title}>{item.amount} Fcfa</Text>
-    </View>    
+      </View>
+      <Text style={[styles.title, { color: amountColor }]}>
+        {item.amount} Fcfa
+      </Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    height: 70, 
-    width: 350, 
-    borderWidth: 2.2, 
+    height: 70,
+    width: 350,
+    borderWidth: 2.2,
     borderColor: '#F9F9FB',
     backgroundColor: 'white',
-    borderRadius: 15, 
+    borderRadius: 15,
     padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop:10,
+    marginTop: 10,
   },
   title: {
     fontSize: 18,
@@ -47,9 +54,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   image: {
-    width: 40, 
+    width: 40,
     height: 40,
-    borderRadius: 20,  // Circular image
+    borderRadius: 20, // Circular image
     marginRight: 20,
   },
 });

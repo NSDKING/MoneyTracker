@@ -15,12 +15,12 @@ const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
     // You should define translateX using useSharedValue or similar if using Reanimated
   };
 
-  const handlePressIcon = (link) => {
+  const handlePressIcon = (item) => {
     if (linkClicked) {
-      setCategory(link);
+      setCategory(item.id);
       onClose();
     }
-    setLinkfilter(link);
+    setLinkfilter(item.link);
     setLinkClicked(true);
   };
 
@@ -30,7 +30,7 @@ const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={[styles.categoryItem, { width: 65 }]} onPress={() => handlePressIcon(item.link)}>
+    <TouchableOpacity style={[styles.categoryItem, { width: 65 }]} onPress={() => handlePressIcon(item)}>
       <Image source={def} style={styles.categoryImage} />
       <Text style={styles.categoryText} numberOfLines={1} ellipsizeMode="tail">
         {item.name}
