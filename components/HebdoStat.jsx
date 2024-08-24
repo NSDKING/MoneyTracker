@@ -1,23 +1,64 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
-const maxHeigh= 140;
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function HebdoStat() {
-    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    const data = [25, 50, 75, 16, 50, 50, 50]; // Example values
-    const maxValue = Math.max(...data);  // Get the maximum value in the data array
+const maxHeight = 140;
 
-      const renderChartBars = () => {
+export default function HebdoStat({ transactions }) {
+    const [weekData, setWeekData] = useState({
+        expense: [0, 0, 0, 0, 0, 0, 0],
+        income: [0, 0, 0, 0, 0, 0, 0]
+    });
+    const [showIncome, setShowIncome] = useState(false);
+    const daysOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+    useEffect(() => {
+        if (transactions && Object.keys(transactions).length > 0) {
+            calculateWeekData();
+        }
+    }, [transactions]);
+
+    const calculateWeekData = () => {
+        let newWeekData = {
+            expense: [0, 0, 0, 0, 0, 0, 0],
+            income: [0, 0, 0, 0, 0, 0, 0]
+        };
+
+        Object.values(transactions).flat().forEach(transaction => {
+            const transactionDate = new Date(transaction.date);
+            const dayOfWeek = transactionDate.getDay();
+            if (transaction.type === 'income') {
+                newWeekData.income[dayOfWeek] += transaction.amount;
+            } else {
+                newWeekData.expense[dayOfWeek] += transaction.amount;
+            }
+        });
+
+        const maxExpense = Math.max(...newWeekData.expense);
+        const maxIncome = Math.max(...newWeekData.income);
+
+        newWeekData.expense = newWeekData.expense.map(value => 
+            maxExpense > 0 ? (value / maxExpense) * maxHeight : 0
+        );
+        newWeekData.income = newWeekData.income.map(value => 
+            maxIncome > 0 ? (value / maxIncome) * maxHeight : 0
+        );
+
+        setWeekData(newWeekData);
+    }
+
+    const renderChartBars = () => {
+        const data = showIncome ? weekData.income : weekData.expense;
         return daysOfWeek.map((day, index) => {
-
-            // Calculate dynamic height based on the data value
-            const barHeight = (data[index] / maxValue) * maxHeigh;
-
             return (
                 <View key={index} style={styles.chartContainer}>
                     <View style={styles.Emptychart}>
-                        <View style={[styles.chartfilled, { height: barHeight }]}/>
+                        <View style={[
+                            styles.chartfilled, 
+                            { 
+                                height: data[index],
+                                backgroundColor: showIncome ? "#4CAF50" : "#F44336"
+                            }
+                        ]} />
                     </View>
                     <Text style={styles.dayLabel}>{day}</Text>
                 </View>
@@ -25,19 +66,43 @@ export default function HebdoStat() {
         });
     }
 
+    const toggleGraph = () => {
+        setShowIncome(!showIncome);
+    }
+
+    if (!transactions || Object.keys(transactions).length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text>No transactions available</Text>
+            </View>
+        );
+    }
+
     return (
-        <View style={styles.container}>
-            {renderChartBars()}
-        </View>
+        <TouchableOpacity onPress={toggleGraph} style={styles.container}>
+            <Text style={styles.title}>{showIncome ? "Income" : "Expense"}</Text>
+            <View style={styles.graphContainer}>
+                {renderChartBars()}
+            </View>
+        </TouchableOpacity>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    graphContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'flex-end',
-        marginVertical: 20,
+        width: '100%',
     },
     chartContainer: {
         alignItems: 'center',
@@ -45,16 +110,13 @@ const styles = StyleSheet.create({
     Emptychart: {
         backgroundColor: "#D9DAE3",
         width: 36,
-        height: maxHeigh,
+        height: maxHeight,
         borderRadius: 10,
         justifyContent: 'flex-end',
     },
     chartfilled: {
-        backgroundColor: "#BC0003",
         width: 36,
-      
         borderRadius: 10,
-
     },
     dayLabel: {
         marginTop: 5,
