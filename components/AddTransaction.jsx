@@ -20,7 +20,7 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
 
     const onSubmit = data => {
         // Log form data and additional state
-        addTransaction(selectedDate, data.amount, data.note, cateValue, type);
+        addTransaction(selectedDate, data.amount, data.note, cateValue, type, selectedArdoise);
         reset();  
         onClose();  
     };
@@ -141,7 +141,7 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
                         style={styles.picker}
                     >
                         {Ardoises.map((ardoise, index) => (
-                            <Picker.Item key={index} label={ardoise.name} value={ardoise.name} />
+                            <Picker.Item key={index} label={ardoise.name} value={ardoise.id} />
                         ))}
                 </Picker>
 

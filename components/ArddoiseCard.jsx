@@ -30,7 +30,7 @@ const ArdoiseCard = ({ item, onEdit }) => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate('ArdoiseData', { ardoiseId: item.id, ardoiseName: item.name });
+    navigation.navigate('ArdoiseData', { ardoiseId: item.id, ardoiseName: item.name, ArdoiseAmount:item.amount });
   };
   return (
     <TouchableOpacity onPress={handlePress}>

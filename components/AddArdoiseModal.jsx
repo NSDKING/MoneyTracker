@@ -18,7 +18,7 @@ export default function AddArdoiseModal({ visible, onClose, addArdoise }) {
     const [selectedRisk, setSelectedRisk] = useState(riskLevels[0]);
 
     const onSubmit = data => {
-        addArdoise(data.name, selectedRisk); // Set amount to 0 by default
+        addArdoise(data.name, selectedRisk);  
         reset();
         setSelectedRisk(riskLevels[0]);
         onClose();

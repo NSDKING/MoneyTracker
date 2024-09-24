@@ -23,6 +23,7 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
  
+ 
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -93,7 +94,7 @@ export default function Home() {
         db.withTransactionAsync(async () => {
             await getData();
         });
-    }, [db]);
+     }, [db]);
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -103,23 +104,24 @@ export default function Home() {
         }).start();
     }, [isOper]);
 
-    const addTransaction = async (date, amount, note, category_ID, type) => {
+    const addTransaction = async (date, amount, note, category_ID, type, ardoise_ID) => {
         try {
-            await db.runAsync(
-                'INSERT INTO transactions (date, amount, category_ID, note, type) VALUES (?, ?, ?, ?, ?)', 
-                [convertTimestampToDate(date), amount, category_ID, note, type]
+           const upd= await db.runAsync(
+                'INSERT INTO transactions (date, amount, category_ID, note, type, ardoise_ID) VALUES (?, ?, ?, ?, ?, ?)', 
+                [convertTimestampToDate(date), amount, category_ID, note, type, ardoise_ID]
             );
+   
             getData();
         } catch (error) {
             console.error('Error adding transaction:', error);
         }
     };
 
-    const editTransaction = async (date, amount, category_ID, note, type) => {
+    const editTransaction = async (date, amount, category_ID, note, type, ardoise_ID) => {
         try {
             await db.runAsync(
-                'UPDATE transactions SET date = ?, amount = ?, category_ID = ?, note = ?, type = ? WHERE id = ?',
-                [convertTimestampToDate(date), amount, category_ID, note, type, editId]
+                'UPDATE transactions SET date = ?, amount = ?, category_ID = ?, note = ?, type = ?, ardoise_ID = ? WHERE id = ?',
+                [convertTimestampToDate(date), amount, category_ID, note, type, ardoise_ID, editId]
             );
             await getData();
             setIsEdit(false);
@@ -128,6 +130,16 @@ export default function Home() {
             Alert.alert("Error", "There was an issue updating the transaction. Please try again.");
         }
     };
+
+      
+        const deleteAllTransactions = async () => {
+          try {
+            await db.runAsync('DELETE FROM transactions');
+          } catch (error) {
+            console.error('Error deleting transactions:', error);
+          }
+        };
+      
 
     return (
         <View style={styles.container}>

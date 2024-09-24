@@ -75,15 +75,16 @@ export default function App() {
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarButton: route.name === 'ArdoiseData' ? () => null : undefined,
+            headerShown: false
+
           })}
           >
             <Tab.Screen name="Home" component={Home} />
             <Tab.Screen name="Ardoise" component={Ardoise} />
+            <Tab.Screen name="Statisque" component={Ardoise} />
             <Tab.Screen 
               name="ArdoiseData" 
-              options={{
-                href: null,
-              }}
+  
               component={ArdoiseDataPage} 
             />
            </Tab.Navigator>

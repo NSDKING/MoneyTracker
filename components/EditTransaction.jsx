@@ -38,7 +38,7 @@ export default function EditTransaction({ visible, onClose, cate, editTransactio
 
     const onSubmit = async data => {
         try {
-            await editTransaction(selectedDate, data.amount, cateValue, data.note, type);
+            await editTransaction(selectedDate, data.amount, cateValue, data.note, type, selectedArdoise);
 
             reset();  
             onClose();  
@@ -167,7 +167,7 @@ export default function EditTransaction({ visible, onClose, cate, editTransactio
                         style={styles.picker}
                 >
                         {Ardoises.map((ardoise, index) => (
-                            <Picker.Item key={index} label={ardoise.name} value={ardoise.name} />
+                            <Picker.Item key={index} label={ardoise.name} value={ardoise.id} />
                         ))}
                 </Picker>
 

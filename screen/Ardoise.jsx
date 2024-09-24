@@ -75,7 +75,7 @@ export default function Ardoise() {
     }
   };
 
-  const editArdoise = async (id, name, amount, risk) => {
+  const editArdoise = async (id, name, risk) => {
     try {
       await db.runAsync(
         'UPDATE Ardoise SET name = ?, risk = ? WHERE id = ?',
@@ -150,6 +150,7 @@ export default function Ardoise() {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 50,
     flex: 1,
     padding: 20,
   },
