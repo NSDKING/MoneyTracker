@@ -68,6 +68,7 @@ export default function Ardoise() {
       await db.runAsync('DELETE FROM Ardoise WHERE id = ?', [id]);
       getArdoises(); // Refresh the list after deleting
       Alert.alert("Success", "Ardoise deleted successfully");
+      setEditModalVisible(false)
     } catch (error) {
       console.error('Error deleting Ardoise:', error);
       Alert.alert("Error", "Failed to delete Ardoise. Please try again.");
