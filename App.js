@@ -1,13 +1,18 @@
-import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import { Suspense, useEffect, useState } from 'react';
 import { SQLiteProvider } from 'expo-sqlite';
 import Home from './screen/Home';
-import { NavigationContainer } from '@react-navigation/native'; // Import NavigationContainer
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Ardoise from './screen/Ardoise';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+
+//screen import outside of the tab
+import ArdoiseDataPage from './screen/ArdoiseDataPage';
+
  
-const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 const loadDatabase = async () => {
   const dbName = "app.db";
@@ -66,13 +71,22 @@ export default function App() {
         }
       >
         <SQLiteProvider databaseName="app.db" useSuspense>
-          <Stack.Navigator>
-            <Stack.Screen
-              name="Home"
-              component={Home}
+           
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarButton: route.name === 'ArdoiseData' ? () => null : undefined,
+          })}
+          >
+            <Tab.Screen name="Home" component={Home} />
+            <Tab.Screen name="Ardoise" component={Ardoise} />
+            <Tab.Screen 
+              name="ArdoiseData" 
+              options={{
+                href: null,
+              }}
+              component={ArdoiseDataPage} 
             />
- 
-          </Stack.Navigator>
+           </Tab.Navigator>
         </SQLiteProvider>
       </Suspense>
     </NavigationContainer>

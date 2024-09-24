@@ -7,8 +7,9 @@ import Modal from 'react-native-modal';
 import calendarIcon from '../assets/img/calendar.png'; // Make sure the icon path is correct
 import deleteIcon from '../assets/img/delete.png'; // Make sure the icon path is correct
 import CategoryModal from './CategoryModal';
+import { Picker } from '@react-native-picker/picker';
 
-export default function EditTransaction({ visible, onClose, cate, editTransaction, onDelete, editItem }) {
+export default function EditTransaction({ visible, onClose, cate, editTransaction, onDelete, editItem, Ardoises }) {
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const [isCalendarVisible, setCalendarVisible] = useState(false);
     const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
@@ -21,6 +22,7 @@ export default function EditTransaction({ visible, onClose, cate, editTransactio
     const [cateValue, setCateValue] = useState(editItem?.category_ID);
     const [selectedCategory, setSelectedCategory] = useState(editItem?.category_ID);
     const [type, setType] = useState(initialType);
+    const [selectedArdoise, setSelectedArdoise] = useState();
 
     useEffect(() => {
         if (editItem) {
@@ -159,6 +161,15 @@ export default function EditTransaction({ visible, onClose, cate, editTransactio
                         />
                     )}
                 />
+                <Picker
+                        selectedValue={selectedArdoise}
+                        onValueChange={(itemValue) => setSelectedArdoise(itemValue)}
+                        style={styles.picker}
+                >
+                        {Ardoises.map((ardoise, index) => (
+                            <Picker.Item key={index} label={ardoise.name} value={ardoise.name} />
+                        ))}
+                </Picker>
 
                 <View style={styles.button}>
                     <Button title="Submit" onPress={handleSubmit(onSubmit)} color="#fff" />

@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
-import CalendarModal from './calendar'; // Ensure this path is correct
+import CalendarModal from './calendar'; 
 import { format } from 'date-fns';
 import Modal from 'react-native-modal'; 
-import calendarIcon from '../assets/img/calendar.png'; // Make sure the icon path is correct
+import calendarIcon from '../assets/img/calendar.png'; 
 import CategoryModal from './CategoryModal';
+import { Picker } from '@react-native-picker/picker';
  
-export default function AddTransaction({ visible, onClose, type, cate, addTransaction }) {
+export default function AddTransaction({ visible, onClose, type, cate, addTransaction, Ardoises }) {
     const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm();
     const [isCalendarVisible, setCalendarVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null); // Use null initially
     const [cateValue, setCateValue] = useState(null);
+    const [selectedArdoise, setSelectedArdoise] = useState();
+
 
     const onSubmit = data => {
         // Log form data and additional state
@@ -49,8 +52,7 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
             style={styles.modalContainer} // Add custom styles
         >
             <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Add Transaction</Text>
-                
+                 
                 <Controller
                     control={control}
                     name="date"
@@ -132,6 +134,16 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
                         />
                     )}
                 />
+
+                <Picker
+                        selectedValue={selectedArdoise}
+                        onValueChange={(itemValue) => setSelectedArdoise(itemValue)}
+                        style={styles.picker}
+                    >
+                        {Ardoises.map((ardoise, index) => (
+                            <Picker.Item key={index} label={ardoise.name} value={ardoise.name} />
+                        ))}
+                </Picker>
 
                 <View style={styles.button}>
                     <Button title="Submit" onPress={handleSubmit(onSubmit)} color="#fff" />

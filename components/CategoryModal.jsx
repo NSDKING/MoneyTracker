@@ -5,15 +5,10 @@ import Modal from 'react-native-modal';
 const def = require('../assets/img/other.png'); // Ensure this path is correct
 
 const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
-  const [firstTab, setFirstTab] = useState(true);
   const [Linkfilter, setLinkfilter] = useState(null);
   const [linkClicked, setLinkClicked] = useState(false);
 
-  const handlePress = (isFirstTab) => {
-    setFirstTab(isFirstTab);
-    // Assuming you want to handle some animation with translateX here
-    // You should define translateX using useSharedValue or similar if using Reanimated
-  };
+   
 
   const handlePressIcon = (item) => {
     if (linkClicked) {

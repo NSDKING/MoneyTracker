@@ -7,11 +7,13 @@ import EditTransaction from '../components/EditTransaction';
 import Operations from '../components/Operations';
 import HebdoStat from '../components/HebdoStat';
 import { formatDate, convertTimestampToDate } from '../utils/dateUtils'; 
+import Ardoise from './Ardoise';
 
 export default function Home() {
     const db = useSQLiteContext();
     const [groupedTransactions, setGroupedTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [ardoises, setArdoises] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [type, setType] = useState("");
     const [editId, setEditId] = useState();
@@ -60,8 +62,10 @@ export default function Home() {
         try {
             setLoading(true);
             const fetchedTransactions = await db.getAllAsync('SELECT * FROM transactions');
+            const fetchedArdoises = await db.getAllAsync('SELECT * FROM Ardoise');
             const categories = await db.getAllAsync('SELECT * FROM categories');
             setCategories(categories);
+            setArdoises(fetchedArdoises)
             const grouped = groupByDate(fetchedTransactions);
             setGroupedTransactions(grouped);
             setLoading(false);
@@ -169,6 +173,7 @@ export default function Home() {
                 cate={categories}
                 type={type}
                 addTransaction={addTransaction}
+                Ardoises={ardoises}
             />
             <EditTransaction
                 visible={isEdit}
@@ -178,6 +183,7 @@ export default function Home() {
                 editTransaction={editTransaction}
                 onDelete={handleDelete}
                 editItem={editItem}
+                Ardoises={ardoises}
             />
             <Operations
                 groupedTransactions={groupedTransactions}
