@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useNavigation } from '@react-navigation/native';
 import ArdoiseCard from '../components/ArddoiseCard';
 import AddArdoiseModal from '../components/AddArdoiseModal';
 import EditArdoiseModal from '../components/EditArdoiseModal';
@@ -12,13 +13,12 @@ export default function Ardoise() {
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [editingArdoise, setEditingArdoise] = useState(null);
   const db = useSQLiteContext();
+  const navigation = useNavigation();
 
- 
-  
   useEffect(() => {
     const initDatabase = async () => {
       await createTableIfNotExists();
-       await getArdoises();
+      await getArdoises();
     };
 
     initDatabase();
@@ -31,8 +31,7 @@ export default function Ardoise() {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT,
           amount INTEGER,
-          risk TEXT,
-          transactionID INTEGER
+          risk TEXT
         )
       `);
       console.log('Ardoise table created or already exists');
@@ -41,34 +40,53 @@ export default function Ardoise() {
     }
   };
 
-  const addArdoise = async (name, risk) => {
+  const calculateTotalAmount = async (ardoiseId) => {
     try {
-      await db.runAsync(
-        'INSERT INTO Ardoise (name, amount, risk) VALUES (?, ?, ?)',
-        [name, 0, risk] // amount is always 0 when adding
-      );
-      getArdoises(); // Refresh the list after adding
+      const transactions = await db.getAllAsync('SELECT * FROM transactions WHERE ardoise_ID = ?', [ardoiseId]);
+      const totalAmount = transactions.reduce((total, transaction) => {
+        const amount = parseFloat(transaction.amount);
+        // Expense adds to the Ardoise, Income subtracts from the Ardoise
+        return transaction.type === 'expense' ? total + amount : total - amount;
+      }, 0);
+      return totalAmount;
     } catch (error) {
-      console.error('Error adding Ardoise:', error);
+      console.error('Error calculating total amount:', error);
+      return 0;
     }
   };
 
   const getArdoises = async () => {
     try {
       const result = await db.getAllAsync('SELECT * FROM Ardoise');
-      setArdoises(result);
+      const ardoisesWithTotalAmount = await Promise.all(result.map(async (ardoise) => {
+        const totalAmount = await calculateTotalAmount(ardoise.id);
+        return { ...ardoise, totalAmount };
+      }));
+      setArdoises(ardoisesWithTotalAmount);
     } catch (error) {
       console.error('Error getting Ardoises:', error);
       setArdoises([]);
     }
   };
 
+  const addArdoise = async (name, risk) => {
+    try {
+      await db.runAsync(
+        'INSERT INTO Ardoise (name, amount, risk) VALUES (?, ?, ?)',
+        [name, 0, risk]
+      );
+      getArdoises();
+    } catch (error) {
+      console.error('Error adding Ardoise:', error);
+    }
+  };
+
   const deleteArdoise = async (id) => {
     try {
       await db.runAsync('DELETE FROM Ardoise WHERE id = ?', [id]);
-      getArdoises(); // Refresh the list after deleting
+      getArdoises();
       Alert.alert("Success", "Ardoise deleted successfully");
-      setEditModalVisible(false)
+      setEditModalVisible(false);
     } catch (error) {
       console.error('Error deleting Ardoise:', error);
       Alert.alert("Error", "Failed to delete Ardoise. Please try again.");
@@ -79,9 +97,9 @@ export default function Ardoise() {
     try {
       await db.runAsync(
         'UPDATE Ardoise SET name = ?, risk = ? WHERE id = ?',
-        [name, risk, id] // We don't update the amount here
+        [name, risk, id]
       );
-      getArdoises(); // Refresh the list after editing
+      getArdoises();
       Alert.alert("Success", "Ardoise updated successfully");
     } catch (error) {
       console.error('Error editing Ardoise:', error);
@@ -110,13 +128,24 @@ export default function Ardoise() {
     setEditingArdoise(null);
   };
 
+  const handleArdoisePress = (item) => {
+    navigation.navigate('ArdoiseDataPage', {
+      ardoiseId: item.id,
+      ardoiseName: item.name,
+      ardoiseAmount: item.totalAmount
+    });
+  };
+
   const renderArdoiseItem = ({ item }) => (
-    <ArdoiseCard item={item} onEdit={() => handleEditPress(item)} onPress/>
+    <ArdoiseCard 
+      item={item} 
+      onEdit={() => handleEditPress(item)} 
+      onPress={() => handleArdoisePress(item)}
+    />
   );
 
   return (
     <View style={styles.container}>
-       
       <FlatList
         data={ardoises}
         renderItem={renderArdoiseItem}

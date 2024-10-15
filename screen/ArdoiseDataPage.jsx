@@ -7,22 +7,36 @@ import { useSQLiteContext } from 'expo-sqlite';
 const ArdoiseDataPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { ardoiseId, ardoiseName, ArdoiseAmount } = route.params;
+  const { ardoiseId, ardoiseName } = route.params;
   const [transactions, setTransactions] = useState([]);
+  const [ardoiseAmount, setArdoiseAmount] = useState(0);
   const db = useSQLiteContext();
 
   useEffect(() => {
     const fetchTransactions = async () => {
       const fetchedTransactions = await db.getAllAsync('SELECT * FROM transactions WHERE ardoise_ID = ?', [ardoiseId]);
-      const res = await db.getAllAsync('SELECT * FROM transactions');
       setTransactions(fetchedTransactions);
+      
 
-      console.log(fetchedTransactions);
-      console.log(ardoiseId);
-      console.log(res);
+        // Calculate the sum of all transactions
+        const sum = fetchedTransactions.reduce((total, transaction) => {
+            const amount = parseFloat(transaction.amount);
+            return total + amount;
+        }, 0);
+        
 
+      // Update the Ardoise amount in the database
+      await db.runAsync(
+        'UPDATE Ardoise SET amount = ? WHERE id = ?',
+        [sum, ardoiseId]
+      );
+
+      // Update the local state
+      setArdoiseAmount(sum);
+          
     };
-     fetchTransactions();
+
+    fetchTransactions();
   }, [ardoiseId, db]);
 
   const renderTransactionItem = ({ item }) => (
@@ -50,7 +64,7 @@ const ArdoiseDataPage = () => {
         </View>
       </View>
       <View style={styles.amountContainer}>
-        <Text style={styles.amountText}>{ArdoiseAmount} FCFA</Text>
+        <Text style={styles.amountText}>{ardoiseAmount.toFixed(2)} FCFA</Text>
       </View>
       <FlatList
         data={transactions}

@@ -1,42 +1,27 @@
-import { StyleSheet, View, Text, TouchableOpacity, Image, FlatList } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native';
 import React, { useState } from 'react';
-import Modal from 'react-native-modal'; 
+import Modal from 'react-native-modal';
 
 const def = require('../assets/img/other.png'); // Ensure this path is correct
 
 const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
-  const [Linkfilter, setLinkfilter] = useState(null);
+  const [searchText, setSearchText] = useState('');
   const [linkClicked, setLinkClicked] = useState(false);
 
-   
-
   const handlePressIcon = (item) => {
-    if (linkClicked) {
-      setCategory(item.id);
-      onClose();
-    }
-    setLinkfilter(item.link);
+    setCategory(item.id);
+    onClose();
     setLinkClicked(true);
   };
 
   const handleResetFilter = () => {
-    setLinkfilter(null);
+    setSearchText('');
     setLinkClicked(false);
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={[styles.categoryItem, { width: 65 }]} onPress={() => handlePressIcon(item)}>
-      <Image source={def} style={styles.categoryImage} />
-      <Text style={styles.categoryText} numberOfLines={1} ellipsizeMode="tail">
-        {item.name}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  // Filter the categories to only show those with a link formatted like link>
-  const filteredCategories = Linkfilter 
-    ? cate.filter(item => item.link.startsWith(Linkfilter))
-    : cate.filter(item => item.link.endsWith('>'));
+  const filteredCategories = searchText
+    ? cate.filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()))
+    : cate;
 
   return (
     <Modal
@@ -46,18 +31,31 @@ const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <FlatList
-            data={filteredCategories}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            numColumns={5}
-            contentContainerStyle={styles.categoryList}
-            scrollEnabled={filteredCategories.length > 10} // Enable scrolling if there are more than 10 items
+          <Text style={styles.modalTitle}>Select a Category</Text>
+          
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search categories..."
+            value={searchText}
+            onChangeText={setSearchText}
           />
+
+          <ScrollView contentContainerStyle={styles.categoryGrid}>
+            {filteredCategories.map(item => (
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.categoryCard} 
+                onPress={() => handlePressIcon(item)}
+              >
+                <Image source={def} style={styles.categoryImage} />
+                <Text style={styles.categoryText}>{item.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
           {linkClicked && (
             <TouchableOpacity onPress={handleResetFilter} style={styles.resetButton}>
-              <Text style={styles.resetButtonText}>All Categories</Text>
+              <Text style={styles.resetButtonText}>Show All Categories</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -77,47 +75,72 @@ const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    maxHeight: 400, // Set a maximum height for the modal view
-    marginTop:250,
+    maxHeight: 600, // Increased height for better display
   },
   modalView: {
     width: '90%',
-    maxHeight: 400, // Set a maximum height for the modal view
-    backgroundColor: 'white',
+    maxHeight: 600,
+    backgroundColor: '#fff', // White background for contrast
     borderRadius: 20,
     alignItems: 'center',
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  categoryList: {
-    marginTop: 20,
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
   },
-  categoryItem: {
-    flexDirection: 'column',
+  searchInput: {
+    width: '100%',
+    borderRadius: 10,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between', // Space out categories
+  },
+  categoryCard: {
+    width: '30%', // Three items per row for a grid layout
+    backgroundColor: '#f2f2f2', // Light background for cards
+    borderRadius: 15,
     alignItems: 'center',
     paddingVertical: 10,
-    margin: 2,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   categoryImage: {
-    width: 30,
-    height: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25, // Circular image
     marginBottom: 5,
   },
   categoryText: {
     fontSize: 14,
-    color: 'gray',
-    maxWidth: '90%',
+    color: '#555',
+    textAlign: 'center',
   },
   resetButton: {
     marginTop: 20,
-    padding: 10,
-    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#007bff', // Primary color
     borderRadius: 10,
+    elevation: 5,
   },
   resetButtonText: {
     color: 'white',

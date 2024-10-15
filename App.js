@@ -80,8 +80,13 @@ export default function App() {
           })}
           >
             <Tab.Screen name="Home" component={Home} />
-            <Tab.Screen name="Ardoise" component={Ardoise} />
-            <Tab.Screen name="Statisque" component={Ardoise} />
+            {
+              /**
+               * 
+               *         <Tab.Screen name="Ardoise" component={Ardoise} />
+                        <Tab.Screen name="Statisque" component={Ardoise} />
+               */
+            }
             <Tab.Screen 
               name="ArdoiseData" 
   
@@ -93,3 +98,5 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+
