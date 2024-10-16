@@ -11,6 +11,7 @@ import { NavigationContainer } from '@react-navigation/native';
 //screen import outside of the tab
 import ArdoiseDataPage from './screen/ArdoiseDataPage';
 
+ 
 const Tab = createBottomTabNavigator();
 
 const loadDatabase = async () => {
@@ -18,6 +19,8 @@ const loadDatabase = async () => {
   const dbAsset = require("./assets/app.db");
   const dbUri = Asset.fromModule(dbAsset).uri;
   const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
+
+   
 
   try {
     const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
@@ -39,58 +42,14 @@ const loadDatabase = async () => {
   }
 };
 
-const insertDefaultCategories = async (db) => {
-  const categories = {
-    expenses: [
-      "Tuition and Fees",
-      "School Supplies",
-      "Books and Textbooks",
-      "Transportation",
-      "Lunch and Snacks",
-      "Extracurricular Activities",
-      "Clothing",
-      "Technology",
-      "Personal Care",
-      "Entertainment"
-    ],
-    income: [
-      "Allowance",
-      "Part-Time Job",
-      "Babysitting",
-      "Tutoring",
-      "Gifts/Monetary Gifts",
-      "Selling Crafts or Products",
-      "Scholarships or Grants",
-      "Freelance Work"
-    ]
-  };
-
-  try {
-    // Clear existing categories if necessary
-    await db.runAsync('DELETE FROM Categories');
-
-    // Insert new categories
-    for (const [type, items] of Object.entries(categories)) {
-      for (const item of items) {
-        await db.runAsync('INSERT INTO Categories (type, name) VALUES (?, ?)', [type, item]);
-      }
-    }
-    console.log('Default categories inserted successfully.');
-  } catch (error) {
-    console.error('Error inserting default categories:', error);
-  }
-};
+ 
 
 export default function App() {
   const [dbLoaded, setDbLoaded] = useState(false);
-  const db = useSQLiteContext(); // Get the SQLite context
 
   useEffect(() => {
     loadDatabase()
-      .then(() => {
-        setDbLoaded(true);
-        return insertDefaultCategories(db); // Insert categories after loading the database
-      })
+      .then(() => setDbLoaded(true))
       .catch((e) => console.error(e));
   }, []);
 
@@ -101,7 +60,6 @@ export default function App() {
         <Text>Loading Database...</Text>
       </View>
     );
-
   return (
     <NavigationContainer>
       <Suspense
@@ -113,20 +71,32 @@ export default function App() {
         }
       >
         <SQLiteProvider databaseName="app.db" useSuspense>
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              tabBarButton: route.name === 'ArdoiseData' ? () => null : undefined,
-              headerShown: false
-            })}
+           
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarButton: route.name === 'ArdoiseData' ? () => null : undefined,
+            headerShown: false
+
+          })}
           >
             <Tab.Screen name="Home" component={Home} />
+            {
+              /**
+               * 
+               *         <Tab.Screen name="Ardoise" component={Ardoise} />
+                        <Tab.Screen name="Statisque" component={Ardoise} />
+               */
+            }
             <Tab.Screen 
               name="ArdoiseData" 
+  
               component={ArdoiseDataPage} 
             />
-          </Tab.Navigator>
+           </Tab.Navigator>
         </SQLiteProvider>
       </Suspense>
     </NavigationContainer>
   );
 }
+
+

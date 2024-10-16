@@ -7,7 +7,6 @@ import EditTransaction from '../components/EditTransaction';
 import Operations from '../components/Operations';
 import HebdoStat from '../components/HebdoStat';
 import { formatDate, convertTimestampToDate } from '../utils/dateUtils'; 
-import Ardoise from './Ardoise';
 
 export default function Home() {
     const db = useSQLiteContext();
@@ -22,8 +21,6 @@ export default function Home() {
     const [isOper, setIsOper] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
- 
- 
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -65,8 +62,9 @@ export default function Home() {
             const fetchedTransactions = await db.getAllAsync('SELECT * FROM transactions');
             const fetchedArdoises = await db.getAllAsync('SELECT * FROM Ardoise');
             const categories = await db.getAllAsync('SELECT * FROM categories');
+            console.log(categories)
             setCategories(categories);
-            setArdoises(fetchedArdoises)
+            setArdoises(fetchedArdoises);
             const grouped = groupByDate(fetchedTransactions);
             setGroupedTransactions(grouped);
             setLoading(false);
@@ -77,6 +75,7 @@ export default function Home() {
             setLoading(false);
         }
     };
+
     const groupByDate = (transactions) => {
         return transactions.reduce((groups, transaction) => {
             const date = convertTimestampToDate(transaction.date);
@@ -88,13 +87,88 @@ export default function Home() {
         }, {});
     };
 
- 
+    const insertDefaultCategories = async () => {
+        const categories = {
+            expense: [
+                "Tuition and Fees",
+                "School Supplies",
+                "Books and Textbooks",
+                "Transportation",
+                "Lunch and Snacks",
+                "Extracurricular Activities",
+                "Clothing",
+                "Technology",
+                "Personal Care",
+                "Entertainment"
+            ],
+            income: [
+                "Allowance",
+                "Part-Time Job",
+                "Tutoring",
+                "Gifts/Monetary Gifts",
+                "Selling Crafts or Products",
+                "Scholarships or Grants",
+                "Freelance Work"
+            ]
+        };
     
+        try {
+            // Clear existing categories if necessary
+            await db.runAsync('DELETE FROM Categories');
+    
+            // Insert new categories with the appropriate type
+            for (const [type, items] of Object.entries(categories)) {
+                for (const item of items) {
+                    await db.runAsync(
+                        'INSERT INTO Categories (name, link, src, type) VALUES (?, ?, ?, ?)', 
+                        [item, null, null, type]  
+                    );
+                }
+            }
+            console.log('Default categories inserted successfully.');
+        } catch (error) {
+            console.error('Error inserting default categories:', error);
+        }
+    };
+    
+    const createCategoriesTable = async () => {
+        try {
+            // Create a new categories table with the updated structure
+            await db.execAsync(`
+                CREATE TABLE IF NOT EXISTS new_categories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE,
+                    link TEXT,
+                    src TEXT,
+                    type TEXT CHECK(type IN ('expense', 'income'))
+                )
+            `);
+            console.log('New categories table created.');
+    
+            // Copy data from the old categories table to the new one
+            await db.runAsync(`
+                INSERT INTO new_categories (name, link, src, type)
+                SELECT name, link, src, NULL FROM Categories
+            `);
+    
+            // Drop the old categories table
+            await db.runAsync('DROP TABLE Categories');
+    
+            // Rename the new categories table to the original name
+            await db.runAsync('ALTER TABLE new_categories RENAME TO Categories');
+    
+            console.log('Categories table updated successfully.');
+        } catch (error) {
+            console.error('Error creating/updating categories table:', error);
+        }
+    };
+
     useEffect(() => {
         db.withTransactionAsync(async () => {
             await getData();
+            await insertDefaultCategories();  
         });
-     }, [db]);
+    }, [db]);
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -106,11 +180,10 @@ export default function Home() {
 
     const addTransaction = async (date, amount, note, category_ID, type, ardoise_ID) => {
         try {
-           const upd= await db.runAsync(
-                'INSERT INTO transactions (date, amount, category_ID, note, type, ardoise_ID) VALUES (?, ?, ?, ?, ?, ?)', 
-                [convertTimestampToDate(date), amount, category_ID, note, type, ardoise_ID]
+            await db.runAsync(
+                'INSERT INTO transactions (date, amount, category_ID, note, type) VALUES (?, ?, ?, ?, ?, ?)', 
+                [convertTimestampToDate(date), amount, category_ID, note, type]
             );
-   
             getData();
         } catch (error) {
             console.error('Error adding transaction:', error);
@@ -131,15 +204,14 @@ export default function Home() {
         }
     };
 
-      
-        const deleteAllTransactions = async () => {
-          try {
+    const deleteAllTransactions = async () => {
+        try {
             await db.runAsync('DELETE FROM transactions');
-          } catch (error) {
+        } catch (error) {
             console.error('Error deleting transactions:', error);
-          }
-        };
-      
+        }
+    };
+    const filteredCategories = categories.filter(category => category.type === type);
 
     return (
         <View style={styles.container}>
@@ -182,7 +254,7 @@ export default function Home() {
             <AddTransaction
                 visible={modalVisible}
                 onClose={hideModal}
-                cate={categories}
+                cate={filteredCategories}
                 type={type}
                 addTransaction={addTransaction}
                 Ardoises={ardoises}
@@ -190,7 +262,7 @@ export default function Home() {
             <EditTransaction
                 visible={isEdit}
                 onClose={() => setIsEdit(false)}
-                cate={categories}
+                cate={filteredCategories}
                 type={type}
                 editTransaction={editTransaction}
                 onDelete={handleDelete}
@@ -199,7 +271,7 @@ export default function Home() {
             />
             <Operations
                 groupedTransactions={groupedTransactions}
-                categories={categories}
+                categories={filteredCategories}
                 formatDate={formatDate}
                 setIsEdit={setIsEdit}
                 setEditItem={setEditItem}

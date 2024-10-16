@@ -1,8 +1,6 @@
-import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import Modal from 'react-native-modal';
-
-const def = require('../assets/img/other.png'); // Ensure this path is correct
 
 const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
   const [searchText, setSearchText] = useState('');
@@ -26,19 +24,12 @@ const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
   return (
     <Modal
       isVisible={isOpen}
-      onBackdropPress={onClose} // Close the modal when tapping outside
+      onBackdropPress={onClose}
       style={styles.modalContainer}
     >
       <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Select a Category</Text>
-          
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search categories..."
-            value={searchText}
-            onChangeText={setSearchText}
-          />
+        <View style={styles.modalView}>          
+   
 
           <ScrollView contentContainerStyle={styles.categoryGrid}>
             {filteredCategories.map(item => (
@@ -47,7 +38,6 @@ const CategoryModal = ({ isOpen, onClose, setCategory, cate }) => {
                 style={styles.categoryCard} 
                 onPress={() => handlePressIcon(item)}
               >
-                <Image source={def} style={styles.categoryImage} />
                 <Text style={styles.categoryText}>{item.name}</Text>
               </TouchableOpacity>
             ))}
@@ -75,76 +65,77 @@ const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    maxHeight: 600, // Increased height for better display
+    margin: 0,
   },
   modalView: {
-    width: '90%',
-    maxHeight: 600,
-    backgroundColor: '#fff', // White background for contrast
-    borderRadius: 20,
-    alignItems: 'center',
-    padding: 20,
+    width: '85%',
+    maxHeight: '75%',
+    backgroundColor: '#f4f4f4', // Light grey background
+    borderRadius: 12,
+    padding: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 8,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1F2937', // Dark blue-grey
+    marginBottom: 20,
+    textAlign: 'center',
   },
   searchInput: {
     width: '100%',
-    borderRadius: 10,
-    borderColor: '#ccc',
+    borderRadius: 8,
+    borderColor: '#D1D5DB', // Light grey border
     borderWidth: 1,
-    padding: 10,
-    marginBottom: 15,
+    padding: 12,
     fontSize: 16,
+    backgroundColor: '#FFFFFF', // White background for input
+    marginBottom: 20,
   },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between', // Space out categories
+    justifyContent: 'space-between',
+    paddingVertical: 10,
   },
   categoryCard: {
-    width: '30%', // Three items per row for a grid layout
-    backgroundColor: '#f2f2f2', // Light background for cards
-    borderRadius: 15,
+    width: '30%',
+    backgroundColor: '#E5E7EB', // Very light grey for category cards
+    borderRadius: 10,
+    paddingVertical: 15,
     alignItems: 'center',
-    paddingVertical: 10,
     marginBottom: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
-  },
-  categoryImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25, // Circular image
-    marginBottom: 5,
+    elevation: 3,
   },
   categoryText: {
     fontSize: 14,
-    color: '#555',
+    color: '#374151', // Cool grey for text
     textAlign: 'center',
+    fontWeight:"500"
   },
   resetButton: {
     marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#007bff', // Primary color
-    borderRadius: 10,
-    elevation: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    backgroundColor: '#4B5563', // Muted dark grey
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 6,
   },
   resetButtonText: {
-    color: 'white',
+    color: '#FFFFFF', // White text
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });
