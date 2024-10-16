@@ -135,15 +135,7 @@ export default function AddTransaction({ visible, onClose, type, cate, addTransa
                     )}
                 />
 
-                <Picker
-                        selectedValue={selectedArdoise}
-                        onValueChange={(itemValue) => setSelectedArdoise(itemValue)}
-                        style={styles.picker}
-                    >
-                        {Ardoises.map((ardoise, index) => (
-                            <Picker.Item key={index} label={ardoise.name} value={ardoise.id} />
-                        ))}
-                </Picker>
+  
 
                 <View style={styles.button}>
                     <Button title="Submit" onPress={handleSubmit(onSubmit)} color="#fff" />

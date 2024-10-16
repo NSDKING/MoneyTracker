@@ -178,10 +178,10 @@ export default function Home() {
         }).start();
     }, [isOper]);
 
-    const addTransaction = async (date, amount, note, category_ID, type, ardoise_ID) => {
+    const addTransaction = async (date, amount, note, category_ID, type) => {
         try {
             await db.runAsync(
-                'INSERT INTO transactions (date, amount, category_ID, note, type) VALUES (?, ?, ?, ?, ?, ?)', 
+                'INSERT INTO transactions (date, amount, category_ID, note, type) VALUES (?, ?, ?, ?, ?)', 
                 [convertTimestampToDate(date), amount, category_ID, note, type]
             );
             getData();
